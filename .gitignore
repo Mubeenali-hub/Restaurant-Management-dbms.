@@ -1,0 +1,5 @@
+# Environment & credentials
+.env
+*.log
+*.sql.bak
+.DS_Store
