@@ -79,7 +79,31 @@ CREATE TABLE order_items (
     FOREIGN KEY (item_id) REFERENCES menu_items(item_id)
 );
 
--- 3. Core Lookups and Performance Indexes
+-- 3. Invoicing & Billing Entities
+CREATE TABLE invoices (
+    invoice_id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT NOT NULL UNIQUE,
+    subtotal DECIMAL(10, 2) NOT NULL CHECK (subtotal >= 0),
+    tax_rate DECIMAL(4, 2) DEFAULT 0.16 CHECK (tax_rate >= 0),
+    tax_amount DECIMAL(10, 2) GENERATED ALWAYS AS (subtotal * tax_rate) STORED,
+    discount_amount DECIMAL(10, 2) DEFAULT 0.00 CHECK (discount_amount >= 0),
+    total_amount DECIMAL(10, 2) GENERATED ALWAYS AS ((subtotal + (subtotal * tax_rate)) - discount_amount) STORED,
+    invoice_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE
+);
+
+CREATE TABLE payments (
+    payment_id INT AUTO_INCREMENT PRIMARY KEY,
+    invoice_id INT NOT NULL,
+    payment_method ENUM('cash', 'credit_card', 'debit_card', 'online', 'wallet') NOT NULL,
+    amount_paid DECIMAL(10, 2) NOT NULL CHECK (amount_paid > 0),
+    transaction_reference VARCHAR(100) UNIQUE NULL,
+    payment_status ENUM('successful', 'pending', 'failed', 'refunded') DEFAULT 'successful',
+    payment_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (invoice_id) REFERENCES invoices(invoice_id) ON DELETE CASCADE
+);
+
+-- 4. Core Indexes
 CREATE INDEX idx_customers_phone ON customers(phone);
 CREATE INDEX idx_menu_items_name ON menu_items(item_name);
 CREATE INDEX idx_menu_items_category ON menu_items(category_id);
@@ -89,3 +113,8 @@ CREATE INDEX idx_orders_customer ON orders(customer_id);
 CREATE INDEX idx_orders_table ON orders(table_id);
 CREATE INDEX idx_order_items_order ON order_items(order_id);
 CREATE INDEX idx_order_items_item ON order_items(item_id);
+CREATE INDEX idx_invoices_order ON invoices(order_id);
+CREATE INDEX idx_invoices_date ON invoices(invoice_date);
+CREATE INDEX idx_payments_invoice ON payments(invoice_id);
+CREATE INDEX idx_payments_method ON payments(payment_method);
+CREATE INDEX idx_payments_status ON payments(payment_status);
