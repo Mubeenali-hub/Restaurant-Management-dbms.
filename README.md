@@ -6,7 +6,8 @@ A robust, normalized relational database management system designed for complete
 - [x] **Day 1:** Project initialization, directory structure, base tables (`dining_tables`, `staff`).
 - [x] **Day 2:** Normalized schema expansion (`customers`, `menu_categories`, `menu_items`, lookup indexes).
 - [x] **Day 3:** Core order lifecycle (`orders`, `order_items`), generated columns, and master schema consolidation.
-- [ ] **Days 4–7:** Billing, payments, discount tracking, and relational integrity constraints.
+- [x] **Day 4:** Billing & financial engine (`invoices`, `payments`, tax auto-calculation, and payment indexing).
+- [ ] **Days 5–7:** Table reservations, inventory tracking schema, and relational integrity audits.
 - [ ] **Days 8–14:** Mock production seed data insertion & relational validation.
 - [ ] **Days 15–21:** Complex joins, revenue analytics, and SQL views.
 - [ ] **Days 22–28:** Stored procedures, automated status triggers, and indexing.
@@ -30,6 +31,9 @@ mysql -u <username> -p < schema/master_schema.sql
 │   ├── 06_orders.sql
 │   ├── 07_order_items.sql
 │   ├── 08_order_indexes.sql
+│   ├── 09_invoices.sql
+│   ├── 10_payments.sql
+│   ├── 11_billing_indexes.sql
 │   └── master_schema.sql
 ├── data/
 ├── queries/
