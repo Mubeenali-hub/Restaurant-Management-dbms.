@@ -103,7 +103,32 @@ CREATE TABLE payments (
     FOREIGN KEY (invoice_id) REFERENCES invoices(invoice_id) ON DELETE CASCADE
 );
 
--- 4. Core Indexes
+-- 4. Reservations & Inventory Entities
+CREATE TABLE table_reservations (
+    reservation_id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT NOT NULL,
+    table_id INT NOT NULL,
+    reservation_time DATETIME NOT NULL,
+    party_size INT NOT NULL CHECK (party_size > 0),
+    status ENUM('confirmed', 'seated', 'cancelled', 'completed') DEFAULT 'confirmed',
+    special_requests VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE,
+    FOREIGN KEY (table_id) REFERENCES dining_tables(table_id) ON DELETE CASCADE
+);
+
+CREATE TABLE inventory_items (
+    item_id INT AUTO_INCREMENT PRIMARY KEY,
+    item_name VARCHAR(100) NOT NULL UNIQUE,
+    category VARCHAR(50) NOT NULL,
+    current_stock DECIMAL(10, 2) NOT NULL CHECK (current_stock >= 0),
+    unit_of_measure VARCHAR(20) NOT NULL,
+    reorder_threshold DECIMAL(10, 2) NOT NULL CHECK (reorder_threshold >= 0),
+    cost_per_unit DECIMAL(8, 2) NOT NULL CHECK (cost_per_unit >= 0),
+    last_restocked TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- 5. Core Indexes
 CREATE INDEX idx_customers_phone ON customers(phone);
 CREATE INDEX idx_menu_items_name ON menu_items(item_name);
 CREATE INDEX idx_menu_items_category ON menu_items(category_id);
@@ -118,3 +143,9 @@ CREATE INDEX idx_invoices_date ON invoices(invoice_date);
 CREATE INDEX idx_payments_invoice ON payments(invoice_id);
 CREATE INDEX idx_payments_method ON payments(payment_method);
 CREATE INDEX idx_payments_status ON payments(payment_status);
+CREATE INDEX idx_reservations_customer ON table_reservations(customer_id);
+CREATE INDEX idx_reservations_table ON table_reservations(table_id);
+CREATE INDEX idx_reservations_time ON table_reservations(reservation_time);
+CREATE INDEX idx_reservations_status ON table_reservations(status);
+CREATE INDEX idx_inventory_name ON inventory_items(item_name);
+CREATE INDEX idx_inventory_category ON inventory_items(category);
